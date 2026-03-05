@@ -28,7 +28,7 @@ public class FireBuildZone : MonoBehaviour
     private void Start()
     {
         // Ensure we start in Empty state visually
-        SetState(FireState.Empty);
+        SetStartingState(FireState.Empty);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -62,12 +62,20 @@ public class FireBuildZone : MonoBehaviour
         }
     }
 
+    
     private void SetState(FireState newState)
     {
         state = newState;
-
+        Debug.Log("FireState is set to: " + state);
         UpdateVisuals();
         NextCard();
+    }
+
+    // Same as above but this one doesn't update the visuals or advance the ui card for our starting state
+    private void SetStartingState(FireState newState)
+    {
+        state = newState;
+        Debug.Log("FireState is set to: " + state);
     }
 
     private void UpdateVisuals()

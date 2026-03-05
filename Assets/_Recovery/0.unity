@@ -1224,7 +1224,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 408610760317448548, guid: 7744f24c3d7019349b1c5cc9ae287d51, type: 3}
       propertyPath: m_Center.y
-      value: -0.08
+      value: -0.21
       objectReference: {fileID: 0}
     - target: {fileID: 2367136712059234561, guid: 7744f24c3d7019349b1c5cc9ae287d51, type: 3}
       propertyPath: m_Name
