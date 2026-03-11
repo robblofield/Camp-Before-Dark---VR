@@ -9,6 +9,7 @@ TagManager:
   - Kindling
   - Fuel
   - Flint
+  - Water
   layers:
   - Default
   - TransparentFX

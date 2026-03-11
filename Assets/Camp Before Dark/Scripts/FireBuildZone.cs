@@ -2,7 +2,15 @@ using UnityEngine;
 
 public class FireBuildZone : MonoBehaviour
 {
-    public enum FireState { Empty, TinderPlaced, KindlingPlaced, FuelPlaced, Lit }
+    public enum FireState
+    {
+        Empty,
+        TinderPlaced,
+        KindlingPlaced,
+        FuelPlaced,
+        Lit,
+        Boiling
+    }
 
     [SerializeField] private FireState state = FireState.Empty;
 
@@ -11,83 +19,90 @@ public class FireBuildZone : MonoBehaviour
     [SerializeField] private string kindlingTag = "Kindling";
     [SerializeField] private string fuelTag = "Fuel";
     [SerializeField] private string flintTag = "Flint";
+    [SerializeField] private string waterTag = "Water";
 
-    [Header("Fire Visual States (Children of Prefab)")]
+    [Header("Visual States")]
     [SerializeField] private GameObject emptyVisual;
     [SerializeField] private GameObject tinderVisual;
     [SerializeField] private GameObject kindlingVisual;
     [SerializeField] private GameObject fuelVisual;
     [SerializeField] private GameObject litVisual;
+    [SerializeField] private GameObject boilingVisual;
 
-    [Header("Consume Items")]
-    [SerializeField] private bool destroyItemOnUse = true;
-
-    [Header("Coaching Cards (Optional)")]
+    [Header("UI")]
     [SerializeField] private GameObject coachingCardRoot;
 
     private void Start()
     {
-        // Ensure we start in Empty state visually
-        SetStartingState(FireState.Empty);
+        UpdateVisuals();
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (state == FireState.Empty && other.CompareTag(tinderTag))
         {
-            Use(other.gameObject);
-            SetState(FireState.TinderPlaced);
+            state = FireState.TinderPlaced;
+            UpdateVisuals();
+            NextCard();
+            Destroy(other.gameObject);
             return;
         }
 
         if (state == FireState.TinderPlaced && other.CompareTag(kindlingTag))
         {
-            Use(other.gameObject);
-            SetState(FireState.KindlingPlaced);
+            state = FireState.KindlingPlaced;
+            UpdateVisuals();
+            NextCard();
+            Destroy(other.gameObject);
             return;
         }
 
         if (state == FireState.KindlingPlaced && other.CompareTag(fuelTag))
         {
-            Use(other.gameObject);
-            SetState(FireState.FuelPlaced);
+            state = FireState.FuelPlaced;
+            UpdateVisuals();
+            NextCard();
+            Destroy(other.gameObject);
             return;
         }
 
         if (state == FireState.FuelPlaced && other.CompareTag(flintTag))
         {
-            Use(other.gameObject);
-            SetState(FireState.Lit);
+            state = FireState.Lit;
+            UpdateVisuals();
+            NextCard();
+            Destroy(other.gameObject);
+            return;
+        }
+
+        if (state == FireState.Lit && other.CompareTag(waterTag))
+        {
+            state = FireState.Boiling;
+            UpdateVisuals();
+            NextCard();
+            Destroy(other.gameObject);
+            
+
+            // Turn on the boil water timer on the boiling visuals
+            BoilWater boilWater = boilingVisual.GetComponentInChildren<BoilWater>(true);
+            if (boilWater != null)
+            {
+                boilWater.enabled = true;
+            }
+
             return;
         }
     }
 
-    
-    private void SetState(FireState newState)
-    {
-        state = newState;
-        Debug.Log("FireState is set to: " + state);
-        UpdateVisuals();
-        NextCard();
-    }
-
-    // Same as above but this one doesn't update the visuals or advance the ui card for our starting state
-    private void SetStartingState(FireState newState)
-    {
-        state = newState;
-        Debug.Log("FireState is set to: " + state);
-    }
-
     private void UpdateVisuals()
     {
-        // Turn everything off first
         if (emptyVisual) emptyVisual.SetActive(false);
         if (tinderVisual) tinderVisual.SetActive(false);
         if (kindlingVisual) kindlingVisual.SetActive(false);
         if (fuelVisual) fuelVisual.SetActive(false);
         if (litVisual) litVisual.SetActive(false);
+        if (boilingVisual) boilingVisual.SetActive(false);
 
-        // Turn on correct one
         switch (state)
         {
             case FireState.Empty:
@@ -109,17 +124,15 @@ public class FireBuildZone : MonoBehaviour
             case FireState.Lit:
                 if (litVisual) litVisual.SetActive(true);
                 break;
+
+            case FireState.Boiling:
+                if (boilingVisual) boilingVisual.SetActive(true);
+                break;
         }
     }
 
     private void NextCard()
     {
         coachingCardRoot?.SendMessage("Next", SendMessageOptions.DontRequireReceiver);
-    }
-
-    private void Use(GameObject item)
-    {
-        if (destroyItemOnUse && item != null)
-            Destroy(item);
     }
 }
